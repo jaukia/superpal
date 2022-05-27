@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "test": "jest --config jestconfig.json",
+    "test": "jest --config jest.config.js",
     "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p tsconfig.json",
@@ -31,7 +31,9 @@
   },
   "homepage": "https://github.com/jaukia/superpal#readme",
   "devDependencies": {
+    "@babel/preset-env": "^7.18.2",
     "@types/jest": "^27.5.1",
+    "babel-jest": "^28.1.0",
     "jest": "^28.1.0",
     "prettier": "^2.6.2",
     "ts-jest": "^28.0.3",
@@ -41,5 +43,9 @@
   },
   "files": [
     "lib/**/*"
-  ]
+  ],
+  "dependencies": {
+    "culori": "^2.0.3",
+    "hsluv": "^0.1.0"
+  }
 }
