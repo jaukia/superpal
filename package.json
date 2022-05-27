@@ -1,0 +1,24 @@
+{
+  "name": "superpal",
+  "version": "1.0.0",
+  "description": "Creates automatically a palette with vivid colors from a single input color for UI design and design systems.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/jaukia/superpal.git"
+  },
+  "keywords": [
+    "color",
+    "color-palette",
+    "okhsl"
+  ],
+  "author": "Janne Aukia",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jaukia/superpal/issues"
+  },
+  "homepage": "https://github.com/jaukia/superpal#readme"
+}
