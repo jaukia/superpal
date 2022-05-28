@@ -332,7 +332,7 @@ const easeOutCubic = (x: number) => {
 
 // based on palx
 // https://github.com/jxnblk/palx/blob/master/palx/src/index.js
-const colorScaleNames = [
+const COLOR_SCALE_NAMES = [
   'red', // 0
   'orange', // 30
   'yellow', // 60
@@ -348,30 +348,18 @@ const colorScaleNames = [
   'red', // 360
 ];
 
-// based on palx
-// https://github.com/jxnblk/palx/blob/master/palx/src/index.js
 const hueName = (inHue: number) => {
   const i = Math.round((inHue - 2) / 30);
-  const name = colorScaleNames[i];
-  return name;
+  return COLOR_SCALE_NAMES[i];
 };
 
-// based on palx
-// https://github.com/jxnblk/palx/blob/master/palx/src/index.js
-const createArray = (length: number) => {
-  const array = [];
-  for (let i = 0; i < length; i++) {
-    array.push(i);
-  }
-  return array;
-};
-
-// based on palx
-// https://github.com/jxnblk/palx/blob/master/palx/src/index.js
 const createHueLookupArray = (length: number) => {
   const hueStep = 360 / length;
   return (baseHue: number) => {
-    const hueArray = createArray(length).map((n) => Math.floor((baseHue + n * hueStep) % 360));
+    const hueArray = [];
+    for(let i=0; i<length; i++) {
+      hueArray[i] = Math.floor((baseHue + i * hueStep) % 360);
+    }
     return hueArray;
   };
 };
