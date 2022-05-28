@@ -1,5 +1,8 @@
+
+// tslint:disable-next-line: no-var-requires
+const culori = require('culori/require');
+
 import { hsluvToHex, hexToHsluv } from 'hsluv';
-import * as culori from 'culori';
 
 const DEFAULT_COLOR_SPACE: string = 'Okhsl';
 const DEFAULT_MAX_HUE_SHIFT_AMOUNT = 60;
