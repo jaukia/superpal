@@ -357,7 +357,7 @@ const createHueLookupArray = (length: number) => {
   const hueStep = 360 / length;
   return (baseHue: number) => {
     const hueArray = [];
-    for(let i=0; i<length; i++) {
+    for (let i = 0; i < length; i++) {
       hueArray[i] = Math.floor((baseHue + i * hueStep) % 360);
     }
     return hueArray;
