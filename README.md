@@ -20,6 +20,8 @@ Try it out: https://npm.runkit.com/superpal
 
 This is still very much work in progress and most likely has bugs and issues. The goal is to create palettes that would be similar in style and equally good in quality as hand tuned scales of, say, Tailwind, Chakra, Open Color, IBM Carbon, Next UI or Radix Colors.
 
+Inspired by and borrowing the API, color scale names and a couple of color scale related helper functions from [Palx](https://github.com/jxnblk/palx).
+
 What makes Superpal different from, say, Palx:
 
 * Uses Okhsl (and HSLuv) color spaces for, hopefully, more vivid color interpolation
@@ -34,10 +36,9 @@ Areas that could be further improved:
 
 ## Related Projects, Links and Inspiration
 
-Inspired by and borrowing the API, color scale names and a couple of color scale related helper functions from [Palx](https://github.com/jxnblk/palx).
+Tools that in inspired this:
 
-Other tools that in inspired this:
-
+* https://github.com/jxnblk/palx
 * https://tailwind.ink
 * https://ryanberg.net/work/blazer-colors/
 * https://colorcolor.in (and https://colorxcolor.ryanberg.net)
