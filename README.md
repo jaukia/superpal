@@ -8,10 +8,13 @@ npm i superpal
 
 ```js
 import superpal from "superpal";
+// or: const superpal = require("superpal").default;
 
 superpal('#60a5fa')
 // Returns a color object with 12 hues and a gray hue scale
 ```
+
+Try it out: https://npm.runkit.com/superpal
 
 ## About
 
