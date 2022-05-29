@@ -21,11 +21,11 @@ interface ColorScale {
 }
 
 interface ColorMetadata {
-  [index: string]: string|string[];
+  [index: string]: string | string[];
 }
 
 interface ColorPalette {
-  [index: string]: ColorScale|ColorMetadata;
+  [index: string]: ColorScale | ColorMetadata;
 }
 
 interface HueInformation {
@@ -38,8 +38,12 @@ interface HueInformation {
  * SUPEPAL MAIN FUNCTIONS
  *************************/
 
-export const superPal = (hexColorIn: string, addMetadata:boolean = true, colorSpace: string = DEFAULT_COLOR_SPACE, maxHueShiftAmount: number = DEFAULT_MAX_HUE_SHIFT_AMOUNT): ColorPalette => {
-
+export const superPal = (
+  hexColorIn: string,
+  addMetadata: boolean = true,
+  colorSpace: string = DEFAULT_COLOR_SPACE,
+  maxHueShiftAmount: number = DEFAULT_MAX_HUE_SHIFT_AMOUNT,
+): ColorPalette => {
   const correctColorSpaceHSLColor = hexToHSL(hexColorIn, colorSpace);
 
   const rawHSLspaceColor = hexToHSL(hexColorIn, 'HSL');
@@ -68,13 +72,13 @@ export const superPal = (hexColorIn: string, addMetadata:boolean = true, colorSp
 
     const colorScaleArray = superPalColorScale(hexColor, colorSpace, maxHueShiftAmount);
     output[curHueName] = colorScaleArray;
-  })
+  });
 
-  if(addMetadata) {
+  if (addMetadata) {
     output.metadata = {
       main: hueName(rawHSLspaceHues[0]),
-      analogous: [hueName(rawHSLspaceHues[1]),hueName(rawHSLspaceHues[rawHSLspaceHues.length-1])],
-      complementary: hueName(rawHSLspaceHues[rawHSLspaceHues.length/2]),
+      analogous: [hueName(rawHSLspaceHues[1]), hueName(rawHSLspaceHues[rawHSLspaceHues.length - 1])],
+      complementary: hueName(rawHSLspaceHues[rawHSLspaceHues.length / 2]),
     } as ColorMetadata;
   }
 
