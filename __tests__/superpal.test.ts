@@ -156,7 +156,15 @@ const exampleOutput = {
     "700": "#0b7897",
     "800": "#106078",
     "900": "#0e4050"
-  }
+  },
+  "metadata": {
+    "main": "blue",
+    "analogous": [
+      "indigo",
+      "cyan",
+    ],
+    "complementary": "orange",
+  },
 };
 
 test("superpal", () => {
