@@ -1,5 +1,5 @@
 // tslint:disable-next-line: no-var-requires
-const culori = require('culori/require');
+import { converter, formatHex } from 'culori';
 
 import { hsluvToHex, hexToHsluv } from 'hsluv';
 
@@ -9,8 +9,8 @@ const DEFAULT_MAX_HUE_SHIFT_AMOUNT = 60;
 const LIG_STEPS = [97.0, 93.0, 87.0, 80.0, 68.0, 62.0, 55.0, 46.0, 37.0, 25.0];
 const SAT_STEPS = [95.0, 95.0, 95.0, 97.0, 97.0, 97.0, 97.0, 97.0, 90.0, 80.0];
 
-const OKHSL_CONVERTER = culori.converter('okhsl');
-const HSL_CONVERTER = culori.converter('hsl');
+const OKHSL_CONVERTER = converter('okhsl');
+const HSL_CONVERTER = converter('hsl');
 
 /*************************
  * INTERFACES
@@ -38,7 +38,7 @@ interface HueInformation {
  * SUPEPAL MAIN FUNCTIONS
  *************************/
 
-export const superPal = (
+export const superpal = (
   hexColorIn: string,
   addMetadata: boolean = true,
   colorSpace: string = DEFAULT_COLOR_SPACE,
@@ -134,11 +134,11 @@ const HSLtoHex = (colorArray: number[], colorSpaceIn: string) => {
   let outHexColor;
 
   if (colorSpaceIn === 'Okhsl') {
-    outHexColor = culori.formatHex({ mode: 'okhsl', h: curHue, s: curSat / 100.0, l: curLig / 100.0 });
+    outHexColor = formatHex({ mode: 'okhsl', h: curHue, s: curSat / 100.0, l: curLig / 100.0 });
   } else if (colorSpaceIn === 'HSLuv') {
     outHexColor = hsluvToHex([curHue, curSat, curLig]);
   } else if (colorSpaceIn === 'HSL') {
-    outHexColor = culori.formatHex({ mode: 'hsl', h: curHue, s: curSat / 100.0, l: curLig / 100.0 });
+    outHexColor = formatHex({ mode: 'hsl', h: curHue, s: curSat / 100.0, l: curLig / 100.0 });
   }
 
   return outHexColor;
@@ -383,4 +383,4 @@ const createHueLookupArray = (length: number) => {
  * DEFAULT EXPORT
  *************************/
 
-export default superPal;
+export default superpal;
