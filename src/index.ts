@@ -1,6 +1,6 @@
 // tslint:disable-next-line: no-var-requires
-//import { converter, formatHex } from 'culori';
-const { converter, formatHex } = require("../node_modules/culori/bundled/culori.min.cjs");
+const { converter, formatHex } = require('../node_modules/culori/bundled/culori.min.cjs');
+// import { converter, formatHex } from 'culori';
 
 import { hsluvToHex, hexToHsluv } from 'hsluv';
 
@@ -46,8 +46,7 @@ export const superpal = (
   colorSpace: string = DEFAULT_COLOR_SPACE,
   maxHueShiftAmount: number = DEFAULT_MAX_HUE_SHIFT_AMOUNT,
 ): ColorPalette => {
-
-  // perhaps redundant, but ensures that the string input 
+  // perhaps redundant, but ensures that the string input
   // is treated consistently.
   // FIXME: how could p3 be supported?
   const hexColorIn = formatHex(colorStringOrObject);
@@ -96,7 +95,12 @@ export const superpal = (
 
 // this section is completely new
 // and not based on palx
-export const superPalColorScale = (hexColor: string, colorSpace: string, maxHueShiftAmount: number, adjustSaturation:boolean = true): ColorScale => {
+export const superPalColorScale = (
+  hexColor: string,
+  colorSpace: string,
+  maxHueShiftAmount: number,
+  adjustSaturation: boolean = true,
+): ColorScale => {
   const [inHue, inSat, inLig] = hexToHSL(hexColor, colorSpace);
 
   const okhslColor = hexToHSL(hexColor, 'Okhsl');
@@ -105,8 +109,8 @@ export const superPalColorScale = (hexColor: string, colorSpace: string, maxHueS
   const minLightness = Math.min(...LIG_STEPS);
   const maxLightness = Math.max(...LIG_STEPS);
 
-  let satAdjustment:number;
-  if(adjustSaturation) {
+  let satAdjustment: number;
+  if (adjustSaturation) {
     // A simple heuristic for adjusting the saturation to take into account the input
     // color saturation. This may need improving at some point.
     satAdjustment = Math.min(1.0, inSat / SAT_STEPS[0]);
