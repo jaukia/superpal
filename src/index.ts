@@ -1,5 +1,6 @@
 // tslint:disable-next-line: no-var-requires
-import { converter, formatHex } from 'culori';
+//import { converter, formatHex } from 'culori';
+const { converter, formatHex } = require("../node_modules/culori/bundled/culori.min.cjs");
 
 import { hsluvToHex, hexToHsluv } from 'hsluv';
 

@@ -164,6 +164,7 @@ const exampleOutput = {
       "cyan",
     ],
     "complementary": "orange",
+    "input": "#60a5fa",
   },
 };
 
