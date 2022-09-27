@@ -83,6 +83,7 @@ export const superpal = (
 
   if (addMetadata) {
     output.metadata = {
+      input: hexColorIn,
       main: hueName(rawHSLspaceHues[0]),
       analogous: [hueName(rawHSLspaceHues[1]), hueName(rawHSLspaceHues[rawHSLspaceHues.length - 1])],
       complementary: hueName(rawHSLspaceHues[rawHSLspaceHues.length / 2]),
