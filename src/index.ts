@@ -2,6 +2,9 @@
 const { converter, formatHex } = require('../node_modules/culori/bundled/culori.min.cjs');
 // import { converter, formatHex } from 'culori';
 
+// sigh, require works on https://npm.runkit.com/superpal but not when using the
+// library locally.
+
 import { hsluvToHex, hexToHsluv } from 'hsluv';
 
 const DEFAULT_COLOR_SPACE: string = 'Okhsl';
@@ -168,11 +171,13 @@ const hexToHSL = (hexColor: string, colorSpaceIn: string) => {
   let inLig;
   if (colorSpaceIn === 'Okhsl') {
     const raw = OKHSL_CONVERTER(hexColor);
+    if (raw.h === undefined) raw.h = 0.0;
     [inHue, inSat, inLig] = [raw.h, raw.s * 100.0, raw.l * 100.0];
   } else if (colorSpaceIn === 'HSLuv') {
     [inHue, inSat, inLig] = hexToHsluv(hexColor);
   } else if (colorSpaceIn === 'HSL') {
     const raw = HSL_CONVERTER(hexColor);
+    if (raw.h === undefined) raw.h = 0.0;
     [inHue, inSat, inLig] = [raw.h, raw.s * 100.0, raw.l * 100.0];
   }
 
