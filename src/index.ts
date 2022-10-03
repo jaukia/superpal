@@ -1,6 +1,6 @@
 // tslint:disable-next-line: no-var-requires
-const { converter, formatHex } = require('../node_modules/culori/bundled/culori.cjs');
-// import { converter, formatHex } from 'culori';
+// const { converter, formatHex } = require('../node_modules/culori/bundled/culori.cjs');
+import { converter, formatHex } from 'culori';
 
 // sigh, require works on https://npm.runkit.com/superpal but not when using the
 // library locally.
@@ -91,7 +91,8 @@ export const superpal = (
     output.metadata = {
       input: hexColorIn,
       main: hueName(rawHSLspaceHues[0]),
-      analogous: [hueName(rawHSLspaceHues[1]), hueName(rawHSLspaceHues[rawHSLspaceHues.length - 1])],
+      analogous30: [hueName(rawHSLspaceHues[1]), hueName(rawHSLspaceHues[rawHSLspaceHues.length - 1])],
+      analogous60: [hueName(rawHSLspaceHues[2]), hueName(rawHSLspaceHues[rawHSLspaceHues.length - 2])],
       complementary: hueName(rawHSLspaceHues[rawHSLspaceHues.length / 2]),
     } as ColorMetadata;
   }
