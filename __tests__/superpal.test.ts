@@ -159,9 +159,13 @@ const exampleOutput = {
   },
   "metadata": {
     "main": "blue",
-    "analogous": [
+    "analogous30": [
       "indigo",
       "cyan",
+    ],
+    "analogous60": [
+        "violet",
+        "teal",
     ],
     "complementary": "orange",
     "input": "#60a5fa",
