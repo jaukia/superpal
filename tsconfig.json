@@ -3,9 +3,10 @@
     "target": "es2015",
     "module": "es2015",
     "moduleResolution": "node",
+    "esModuleInterop": true,
     "declaration": true,
     "outDir": "./lib",
-    "strict": true
+    "strict": true,
   },
   "include": ["src", "typedeclarations.d.ts"],
   "exclude": ["node_modules", "**/__tests__/*"]
