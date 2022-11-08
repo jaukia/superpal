@@ -5,9 +5,6 @@ import { converter, formatHex } from 'culori';
 // sigh, require works on https://npm.runkit.com/superpal but not when using the
 // library locally.
 
-// sigh, require works on https://npm.runkit.com/superpal but not when using the
-// library locally.
-
 import { hsluvToHex, hexToHsluv } from 'hsluv';
 
 const DEFAULT_COLOR_SPACE: string = 'Okhsl';
