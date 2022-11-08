@@ -1,4 +1,4 @@
-import { converter, formatHex } from "culori";
+import { converter, formatHex } from 'culori';
 import { hsluvToHex, hexToHsluv } from 'hsluv';
 
 const DEFAULT_COLOR_SPACE: string = 'Okhsl';
