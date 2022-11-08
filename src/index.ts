@@ -45,6 +45,10 @@ interface HueInformation {
  * SUPEPAL MAIN FUNCTIONS
  *************************/
 
+export const colorToHex = (colorStringOrObject:any) => {
+   return formatHex(colorStringOrObject);
+};
+
 export const superpal = (
   colorStringOrObject: any,
   adjustSaturation: boolean = true,
