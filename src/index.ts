@@ -1,10 +1,4 @@
-// tslint:disable-next-line: no-var-requires
-// const { converter, formatHex } = require('../node_modules/culori/bundled/culori.cjs');
-import { converter, formatHex } from 'culori';
-
-// sigh, require works on https://npm.runkit.com/superpal but not when using the
-// library locally.
-
+import { converter, formatHex } from "culori";
 import { hsluvToHex, hexToHsluv } from 'hsluv';
 
 const DEFAULT_COLOR_SPACE: string = 'Okhsl';
