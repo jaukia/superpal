@@ -1,5 +1,6 @@
-import { converter, formatHex } from 'culori';
+
 import { hsluvToHex, hexToHsluv } from 'hsluv';
+import { converter, formatHex } from 'culori';
 
 const DEFAULT_COLOR_SPACE: string = 'Okhsl';
 const DEFAULT_MAX_HUE_SHIFT_AMOUNT = 60;
