@@ -1,4 +1,4 @@
-import superpal from '../src/index';
+import superpal from '../lib/index';
 
 const exampleOutput = {
   "gray": {

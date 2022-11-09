@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "test": "jest --config jest.config.js",
+    "test": "tsup; jest --config jest.config.js",
     "build": "tsup",
     "dev": "tsup --watch",
     "format": "prettier --write \"src/**/*.ts\"",
@@ -33,8 +33,10 @@
   "homepage": "https://github.com/jaukia/superpal#readme",
   "devDependencies": {
     "@types/jest": "^27.5.1",
+    "@types/tap": "^15.0.7",
     "jest": "^28.1.0",
     "prettier": "^2.6.2",
+    "tap": "^16.3.0",
     "ts-jest": "^28.0.3",
     "tslint": "^6.1.3",
     "tslint-config-prettier": "^1.18.0",

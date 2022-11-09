@@ -5,5 +5,7 @@ export default defineConfig({
   format: ['cjs'],
   dts: true,
   outDir: 'lib',
-  noExternal: ["culori"]
+  noExternal: ["culori"],
+  treeshake: true,
+  minify: true,
 })
