@@ -8,4 +8,9 @@ export default defineConfig({
   noExternal: ["culori"],
   treeshake: true,
   minify: true,
+  footer: {
+    // See: https://github.com/egoist/tsup/issues/710#issuecomment-1244914755
+    // and: https://github.com/egoist/tsup/issues/572#issuecomment-1060599574
+    js: 'module.exports = module.exports.default;'
+  }
 })
