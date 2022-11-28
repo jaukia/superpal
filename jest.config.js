@@ -1,8 +1,10 @@
+/* cargo-culted from here, and seems to work
+https://stackoverflow.com/a/71545273/676798
+*/
 module.exports = {
-  verbose: true,
-  testRegex: "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
-  moduleFileExtensions: ["js", "jsx", "ts", "tsx"],
-  transform: {
-    '^.+\\.(ts|tsx)?$': 'ts-jest',
-  },
+  preset: 'ts-jest/presets/js-with-ts',
+  testEnvironment: "node",
+  transformIgnorePatterns: [
+      "node_modules/(?!culori/.*)",
+  ],
 };

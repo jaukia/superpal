@@ -212,6 +212,7 @@ What makes Superpal different from, say, Palx:
 
 * Uses Okhsl (and HSLuv) color spaces for, hopefully, more vivid color interpolation
 * Hue rotation/shifting to create more appealing scales
+* Metadata on complementary and analogous colors to make it easier to create pleasing color combinations
 
 Areas that could be further improved:
 
