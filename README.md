@@ -3,18 +3,26 @@
 Create vivid UI palettes automatically from a single input color.
 
 ```js
-npm i superpal
-```
+var superpal = require("superpal")
+superpal.default("#60a5fa");
 
-```js
-import superPal from "superpal";
-// or: const superPal = require("superpal").default;
+// or:
 
-superPal('#60a5fa')
-// Returns a color object with 12 hues and a gray hue scale
+import { superpal } from "superpal";
+superpal("#60a5fa");
+
+// => These return object with 12 hues, a gray hue scale and color metadata
 ```
 
 Try it out: https://npm.runkit.com/superpal
+
+## Install
+
+```js
+npm install superpal
+// Or:
+yarn add superpal
+```
 
 ## About
 
