@@ -4,7 +4,7 @@ Create vivid UI palettes automatically from a single input color.
 
 ```js
 var superpal = require("superpal");
-const colorData = superpal("#60a5fa");
+const colorData = superpal.default("#60a5fa");
 
 // or
 
