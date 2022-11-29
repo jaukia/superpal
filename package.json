@@ -10,11 +10,10 @@
     "dev": "tsup --watch",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p tsconfig.json",
-    "prepare": "npm run build",
-    "prepublishOnly": "npm test && npm run lint",
-    "preversion": "npm run lint",
-    "version": "npm run format && git add -A src",
-    "postversion": "git push && git push --tags"
+    "prepack": "yarn build",
+    "prepublish": "yarn format && yarn test && yarn lint",
+    "publish": "yarn npm publish --access public",
+    "bump": "yarn lint && yarn version -i patch && git push && git push --tags"
   },
   "repository": {
     "type": "git",
