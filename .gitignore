@@ -3,3 +3,4 @@ misc
 /lib
 UPDATING.txt
 .yarn
+.pnp.*
