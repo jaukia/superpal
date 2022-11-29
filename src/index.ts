@@ -1,7 +1,7 @@
 import { hsluvToHex, hexToHsluv } from 'hsluv';
 import { converter, formatHex } from 'culori';
 
-const DEFAULT_COLOR_SPACE: string = 'Okhsl';
+const DEFAULT_COLOR_SPACE = 'Okhsl';
 const DEFAULT_MAX_HUE_SHIFT_AMOUNT = 60;
 
 const LIG_STEPS = [97.0, 93.0, 87.0, 80.0, 68.0, 62.0, 55.0, 46.0, 37.0, 25.0];
@@ -32,18 +32,18 @@ interface HueInformation {
   maxDistance: number;
 }
 
-/*************************
+/** ***********************
  * SUPEPAL MAIN FUNCTIONS
  *************************/
 
-export const colorToHex = (colorStringOrObject: any) => {
+export const colorToHex = (colorStringOrObject: string|object) => {
   return formatHex(colorStringOrObject);
 };
 
 export const superpal = (
-  colorStringOrObject: any,
-  adjustSaturation: boolean = true,
-  addMetadata: boolean = true,
+  colorStringOrObject: string|object,
+  adjustSaturation = true,
+  addMetadata = true,
   colorSpace: string = DEFAULT_COLOR_SPACE,
   maxHueShiftAmount: number = DEFAULT_MAX_HUE_SHIFT_AMOUNT,
 ): ColorPalette => {
@@ -101,9 +101,9 @@ export const superPalColorScale = (
   hexColor: string,
   colorSpace: string,
   maxHueShiftAmount: number,
-  adjustSaturation: boolean = true,
+  adjustSaturation = true,
 ): ColorScale => {
-  const [inHue, inSat, inLig] = hexToHSL(hexColor, colorSpace);
+  const [inHue, inSat] = hexToHSL(hexColor, colorSpace);
 
   const okhslColor = hexToHSL(hexColor, 'Okhsl');
   const okhslHueAngle = okhslColor[0];
@@ -134,7 +134,6 @@ export const superPalColorScale = (
     const curHue = inHue + curHueRotation;
 
     const curSat = satAdjustment * SAT_STEPS[index];
-    const curColorString = Math.round(curHue) + ',' + Math.round(curSat) + ',' + curLig;
 
     const outHexColor = HSLtoHex([curHue, curSat, curLig], colorSpace);
 
@@ -144,7 +143,7 @@ export const superPalColorScale = (
   return colorMap;
 };
 
-/*************************
+/** ***********************
  * HELPERS: COLOR CONVERSION AND ADJUSTMENT
  *************************/
 
@@ -206,7 +205,7 @@ const rotateHue = (
   // https://github.com/vasturiano/d3-force-3d
 
   if (lightness > lightnessMidpoint) {
-    const { dir, distance, maxDistance } = findNearestHue(okhslHue, 'light');
+    const { dir, distance } = findNearestHue(okhslHue, 'light');
 
     let hueFractionInScale = easeInQuad(mpDistance / (maxLightness - lightnessMidpoint + 15.0));
 
@@ -215,7 +214,7 @@ const rotateHue = (
 
     rotation = dir * Math.min(distance, maxHueShiftAmount) * hueFractionInScale;
   } else {
-    const { dir, distance, maxDistance } = findNearestHue(okhslHue, 'dark');
+    const { dir, distance } = findNearestHue(okhslHue, 'dark');
 
     let hueFractionInScale = easeOutCubic(mpDistance / (lightnessMidpoint - minLightness + 40.0));
 
@@ -233,8 +232,8 @@ const findNearestHue = (okhslHue: number, mode: 'light' | 'dark'): HueInformatio
   if (hue < 0) hue += 360.0;
 
   let dir: 1 | -1 = -1;
-  let distance: number = 0;
-  let maxDistance: number = 0;
+  let distance = 0;
+  let maxDistance = 0;
 
   if (mode === 'light') {
     const okhslColorStops = {
@@ -351,7 +350,7 @@ const findNearestHue = (okhslHue: number, mode: 'light' | 'dark'): HueInformatio
   return { dir, distance, maxDistance };
 };
 
-/*************************
+/** ***********************
  * HELPERS: EASING
  *************************/
 
@@ -363,7 +362,7 @@ const easeOutCubic = (x: number) => {
   return 1 - Math.pow(1 - x, 3);
 };
 
-/*************************
+/** ***********************
  * HELPERS: NAMED SCALES
  *************************/
 
@@ -401,7 +400,7 @@ const createHueLookupArray = (length: number) => {
   };
 };
 
-/*************************
+/** ***********************
  * DEFAULT EXPORT
  *************************/
 
