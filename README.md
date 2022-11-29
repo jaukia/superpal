@@ -13,7 +13,7 @@ const colorData = superpal("#60a5fa");
 
 // => these return object with 12 color hue scales, 
 //    a gray hue scale as well as color metadata
-//    (see "Example oOtput" below).
+//    (see "Example output" below).
 ```
 
 Try it out: https://npm.runkit.com/superpal

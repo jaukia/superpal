@@ -2,3 +2,4 @@ node_modules
 misc
 /lib
 UPDATING.txt
+.yarn
