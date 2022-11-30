@@ -77,8 +77,10 @@ interface PaletteParams {
   addMetadata: boolean;
   colorSpace: ColorSpace;
   maxHueShiftAmount: number;
-  lightnessValues: number[],
-  saturationFinetune: number[] | false,
+  lightnessValues: number[];
+  saturationFinetune: number[] | false;
+  grayscaleSaturation: number;
+  spreadOutMinMaxValues: boolean;
 }
 
 const defaultPaletteParams: PaletteParams = {
@@ -88,6 +90,8 @@ const defaultPaletteParams: PaletteParams = {
   maxHueShiftAmount: 60.0,
   lightnessValues: [0.97, 0.93, 0.87, 0.8, 0.68, 0.62, 0.55, 0.46, 0.37, 0.25],
   saturationFinetune: [0.95, 0.95, 0.95, 0.97, 0.97, 0.97, 0.97, 0.97, 0.9, 0.8],
+  grayscaleSaturation: 0.08,
+  spreadOutMinMaxValues: true,
 };
 
 /** ***********************
@@ -98,7 +102,6 @@ export const superpal = (
   colorStringOrObject: string | object,
   paramsIn: Optional<PaletteParams> = {},
 ): ColorPalette => {
-
   const params = {
     ...defaultPaletteParams,
     ...paramsIn,
@@ -136,7 +139,12 @@ export const superpal = (
     output[curHueName] = colorScaleArray;
   });
 
-  const grayScaleBaseColor = { mode: params.colorSpace, h: correctColorSpaceHSLColor.h, s: 0.08, l: 0.5 };
+  const grayScaleBaseColor = {
+    mode: params.colorSpace,
+    h: correctColorSpaceHSLColor.h,
+    s: params.grayscaleSaturation,
+    l: 0.5,
+  };
   output.gray = buildColorScale(grayScaleBaseColor, params);
 
   if (params.addMetadata) {
@@ -152,10 +160,7 @@ export const superpal = (
   return output;
 };
 
-export const buildColorScale = (
-  baseColor: HslColorObject,
-  params: PaletteParams,
-): ColorScale => {
+export const buildColorScale = (baseColor: HslColorObject, params: PaletteParams): ColorScale => {
   const okhslColor = colorToColor(baseColor, 'okhsl');
   const okhslHueAngle = okhslColor.h;
 
@@ -166,8 +171,8 @@ export const buildColorScale = (
   if (params.adjustSaturation) {
     // A simple heuristic for adjusting the saturation to take into account the input
     // color saturation. This may need improving at some point.
-    const fineTune = params.saturationFinetune?params.saturationFinetune[0]:1.0;
-    adjustedSatValue = Math.min(1.0, baseColor.s/fineTune);
+    const fineTune = params.saturationFinetune ? params.saturationFinetune[0] : 1.0;
+    adjustedSatValue = Math.min(1.0, baseColor.s / fineTune);
   } else {
     adjustedSatValue = 1.0;
   }
@@ -178,14 +183,21 @@ export const buildColorScale = (
     // recalculating color as okhsl to get correct angles, since not sure
     // what format it is really in, this would be simpler
     // if/when we can always assume okhsl color space
-    const curHueRotation = rotateHue(okhslHueAngle, curLig, minLightness, maxLightness, params.maxHueShiftAmount);
+    const curHueRotation = rotateHue(
+      okhslHueAngle,
+      curLig,
+      minLightness,
+      maxLightness,
+      params.maxHueShiftAmount,
+      params.spreadOutMinMaxValues,
+    );
 
     // this is not quite correct, since we are taking a delta angle from
     // okhsl color space and applying it potentially to something else, but
     // perhaps that is not a major issue
     const curHue = baseColor.h + curHueRotation;
 
-    const satMultiplier = params.saturationFinetune?params.saturationFinetune[index]:1.0;
+    const satMultiplier = params.saturationFinetune ? params.saturationFinetune[index] : 1.0;
 
     const curSat = adjustedSatValue * satMultiplier;
     const outHexColor = colorToHex({ mode: params.colorSpace, h: curHue, s: curSat, l: curLig });
@@ -255,12 +267,8 @@ const rotateHue = (
   minLightness: number,
   maxLightness: number,
   maxHueShiftAmount: number,
+  spreadOutMinMaxValues: boolean,
 ) => {
-  const lightnessMidpoint = maxLightness - minLightness;
-  const lightnessMidpointDistance = Math.abs(lightness - lightnessMidpoint);
-
-  let rotation;
-
   // FIXME: could add a heuristic that we bend less
   // colors that have large hueFractionInScale but small distance
   // -> not sure if there is some elegant math way to express that...
@@ -271,26 +279,24 @@ const rotateHue = (
   // repels could be both other nodes and certain ugly shades (dark yellow)
   // https://github.com/vasturiano/d3-force-3d
 
-  if (lightness > lightnessMidpoint) {
-    const { dir, distance } = findNearestHue(okhslHue, 'light');
+  const lightnessMidpoint = maxLightness - minLightness;
+  const isLight = lightness > lightnessMidpoint;
+  const { dir, distance } = findNearestHue(okhslHue, isLight ? 'light' : 'dark');
 
-    let hueFractionInScale = easeInQuad(lightnessMidpointDistance / (maxLightness - lightnessMidpoint + 0.15));
-
-    // hack to make dark/light colors spread out a bit over hues
-    if (hueFractionInScale > 0.2 && distance < 50.0) hueFractionInScale = 0.2;
-
-    rotation = dir * Math.min(distance, maxHueShiftAmount) * hueFractionInScale;
-  } else {
-    const { dir, distance } = findNearestHue(okhslHue, 'dark');
-
-    let hueFractionInScale = easeOutCubic(lightnessMidpointDistance / (lightnessMidpoint - minLightness + 0.4));
-
-    // hack to make dark/light colors spread out a bit over hues
-    if (hueFractionInScale > 0.4 && distance < 70.0) hueFractionInScale = 0.4;
-
-    rotation = dir * Math.min(distance, maxHueShiftAmount) * hueFractionInScale;
+  let hueFractionInScale = 1.0;
+  // hack to make dark/light colors spread out a bit over hues
+  if (spreadOutMinMaxValues) {
+    const lightnessMidpointDistance = Math.abs(lightness - lightnessMidpoint);
+    if (isLight) {
+      hueFractionInScale = easeInQuad(lightnessMidpointDistance / (maxLightness - lightnessMidpoint + 0.15));
+      if (hueFractionInScale > 0.2 && distance < 50.0) hueFractionInScale = 0.2;
+    } else {
+      hueFractionInScale = easeOutCubic(lightnessMidpointDistance / (lightnessMidpoint - minLightness + 0.4));
+      if (hueFractionInScale > 0.4 && distance < 70.0) hueFractionInScale = 0.4;
+    }
   }
 
+  const rotation = dir * Math.min(distance, maxHueShiftAmount) * hueFractionInScale;
   return rotation;
 };
 
