@@ -2,21 +2,21 @@ import { hsluvToHex, hexToHsluv } from 'hsluv';
 import { converter, formatHex } from 'culori';
 
 const DEFAULT_COLOR_SPACE:ColorSpace = 'okhsl';
-const DEFAULT_MAX_HUE_SHIFT_AMOUNT = 60;
+const DEFAULT_MAX_HUE_SHIFT_AMOUNT = 60.0;
 
 // hand-picked values, to try to optimize the quality of the palette
 // when compared to handmade palettes
-const LIG_STEPS = [97.0, 93.0, 87.0, 80.0, 68.0, 62.0, 55.0, 46.0, 37.0, 25.0];
-const SAT_STEPS = [95.0, 95.0, 95.0, 97.0, 97.0, 97.0, 97.0, 97.0, 90.0, 80.0];
+const LIG_STEPS = [0.97, 0.93, 0.87, 0.80, 0.68, 0.62, 0.55, 0.46, 0.37, 0.25];
+const SAT_STEPS = [0.95, 0.95, 0.95, 0.97, 0.97, 0.97, 0.97, 0.97, 0.90, 0.80];
 
 const OKHSL_CONVERTER = converter('okhsl');
 const HSL_CONVERTER = converter('hsl');
 
 /*************************
- * INTERFACES
+ * INTERFACES AND TYPES
  *************************/
 
- type ColorSpace = 'okhsl' | 'hsluv' | 'hsl';
+type ColorSpace = 'okhsl' | 'hsluv' | 'hsl';
 
 interface ColorScale {
   [index: string]: string;
@@ -39,6 +39,13 @@ interface ColorObject {
   r?: number;
   g?: number;
   b?: number;
+}
+
+interface HslColorObject {
+  mode: string;
+  h: number;
+  s: number;
+  l: number;
 }
 
 export type ColorScaleKey =
@@ -85,10 +92,10 @@ export const superpal = (
   // FIXME: how could p3 be supported?
   const hexColorIn = formatHex(colorStringOrObject);
 
-  const correctColorSpaceHSLColor = hexToHSL(hexColorIn, colorSpace);
+  const correctColorSpaceHSLColor = hexToColor(hexColorIn, colorSpace);
 
-  const rawHSLspaceColor = hexToHSL(hexColorIn, 'hsl');
-  const rawHSLspaceHues = createHueLookupArray(12)(rawHSLspaceColor[0]);
+  const rawHSLspaceColor = colorToColor(correctColorSpaceHSLColor, 'hsl');
+  const rawHSLspaceHues = createHueLookupArray(12)(rawHSLspaceColor.h);
 
   const output: ColorPalette = <ColorPalette>{};
 
@@ -96,24 +103,20 @@ export const superpal = (
     const curHueName = hueName(rawHSLspaceHue);
     if (curHueName === undefined) return;
 
-    const rawHSLSpaceHexForCurHue = colorToHex(
-      {mode:'hsl', h:rawHSLspaceHue, s:rawHSLspaceColor[1]/100.0, l:rawHSLspaceColor[2]/100.0}
-    );
-
-    const curHueAngleInCorrectColorSpace = hexToHSL(rawHSLSpaceHexForCurHue, colorSpace)[0];
+    const curHueInCorrectColorSpace = colorToColor({...rawHSLspaceColor, h:rawHSLspaceHue}, colorSpace);
 
     // we pass in color with equal lightness/saturation here for scale
     // generation. perhaps not the "correct" lightness, but doesn't matter
     // since the lightness values get mangled anyhow in color creation
-    const hexColor = colorToHex({mode: colorSpace,
-      h:curHueAngleInCorrectColorSpace, s:correctColorSpaceHSLColor[1]/100.0, l:correctColorSpaceHSLColor[2]/100.0
-    });
+    const baseColor = {mode: colorSpace,
+      h:curHueInCorrectColorSpace.h, s:correctColorSpaceHSLColor.s, l:correctColorSpaceHSLColor.l
+    };
 
-    const colorScaleArray = buildColorScale(hexColor, colorSpace, maxHueShiftAmount, adjustSaturation);
+    const colorScaleArray = buildColorScale(baseColor, colorSpace, maxHueShiftAmount, adjustSaturation);
     output[curHueName] = colorScaleArray;
   });
 
-  const grayScaleBaseColor = colorToHex({mode: colorSpace, h: correctColorSpaceHSLColor[0], s: 8.0/100.0, l: 50.0/100.0});
+  const grayScaleBaseColor = {mode: colorSpace, h: correctColorSpaceHSLColor.h, s: 0.08, l: 0.50};
   output.gray = buildColorScale(grayScaleBaseColor, colorSpace, maxHueShiftAmount, true);
 
   if (addMetadata) {
@@ -130,15 +133,13 @@ export const superpal = (
 };
 
 export const buildColorScale = (
-  hexColor: string,
+  baseColor: HslColorObject,
   colorSpace: ColorSpace,
   maxHueShiftAmount: number,
   adjustSaturation = true,
 ): ColorScale => {
-  const [inHue, inSat] = hexToHSL(hexColor, colorSpace);
-
-  const okhslColor = hexToHSL(hexColor, 'okhsl');
-  const okhslHueAngle = okhslColor[0];
+  const okhslColor = colorToColor(baseColor, 'okhsl');
+  const okhslHueAngle = okhslColor.h;
 
   const minLightness = Math.min(...LIG_STEPS);
   const maxLightness = Math.max(...LIG_STEPS);
@@ -147,7 +148,7 @@ export const buildColorScale = (
   if (adjustSaturation) {
     // A simple heuristic for adjusting the saturation to take into account the input
     // color saturation. This may need improving at some point.
-    satAdjustment = Math.min(1.0, inSat / SAT_STEPS[0]);
+    satAdjustment = Math.min(1.0, baseColor.s / SAT_STEPS[0]);
   } else {
     satAdjustment = 1.0;
   }
@@ -163,20 +164,22 @@ export const buildColorScale = (
     // this is not quite correct, since we are taking a delta angle from
     // okhsl color space and applying it potentially to something else, but
     // perhaps that is not a major issue
-    const curHue = inHue + curHueRotation;
+    const curHue = baseColor.h + curHueRotation;
 
     const curSat = satAdjustment * SAT_STEPS[index];
-
-    const outHexColor = colorToHex({mode: colorSpace, h:curHue, s:curSat/100.0, l:curLig/100.0});
-
+    const outHexColor = colorToHex({mode: colorSpace, h:curHue, s:curSat, l:curLig});
     colorMap[index * 100] = outHexColor;
   });
 
   return colorMap;
 };
 
-// export culori colorToHex to make it available easily
-// for libraries that use superpal and extend it with hsluv support
+/** ***********************
+ * HELPERS: EXPORTED COLOR CONVERTERS
+ *************************/
+
+// culori-like color object to hex conversion
+// but supports also hsluv
 export const colorToHex = (colorStringOrObject: string | ColorObject) => {
   const c = <ColorObject>colorStringOrObject;
   if(c.mode && c.mode === 'hsluv') {
@@ -187,28 +190,41 @@ export const colorToHex = (colorStringOrObject: string | ColorObject) => {
   }
 }
 
-/** ***********************
- * HELPERS: COLOR CONVERSION AND ADJUSTMENT
- *************************/
-
-const hexToHSL = (hexColor: string, colorSpaceIn: ColorSpace) => {
-  let inHue;
-  let inSat;
-  let inLig;
+// hex to culori-like color object conversion
+// but supports also hsluv
+export const hexToColor = (hexColor: string, colorSpaceIn: ColorSpace):HslColorObject => {
+  let retValue:HslColorObject;
   if (colorSpaceIn === 'okhsl') {
-    const raw = OKHSL_CONVERTER(hexColor);
-    if (raw.h === undefined) raw.h = 0.0;
-    [inHue, inSat, inLig] = [raw.h, raw.s * 100.0, raw.l * 100.0];
+    retValue = OKHSL_CONVERTER(hexColor);
   } else if (colorSpaceIn === 'hsluv') {
-    [inHue, inSat, inLig] = hexToHsluv(hexColor);
-  } else if (colorSpaceIn === 'hsl') {
-    const raw = HSL_CONVERTER(hexColor);
-    if (raw.h === undefined) raw.h = 0.0;
-    [inHue, inSat, inLig] = [raw.h, raw.s * 100.0, raw.l * 100.0];
+    const [inHue, inSat, inLig] = hexToHsluv(hexColor);
+    retValue = {mode: 'hsluv', h:inHue, s:inSat/100.0, l:inLig/100.0};
+  } else {
+    retValue = HSL_CONVERTER(hexColor);
   }
-
-  return [inHue, inSat, inLig];
+  return retValue;
 };
+
+// culori-like color object to culori-like color object
+// in another color space conversion, supports also hsluv
+export const colorToColor = (colorObject:ColorObject, targetColorSpace: ColorSpace) => {
+  let retValue:HslColorObject;
+  if (targetColorSpace === 'okhsl') {
+    retValue = OKHSL_CONVERTER(colorObject);
+  } else if (targetColorSpace === 'hsluv') {
+    // FIXME: some other intermediate format could be better than hex here
+    const hexColor = colorToHex(colorObject);
+    const [inHue, inSat, inLig] = hexToHsluv(hexColor);
+    retValue = {mode: 'hsluv', h:inHue, s:inSat/100.0, l:inLig/100.0};
+  } else {
+    retValue = HSL_CONVERTER(colorObject);
+  }
+  return retValue;
+}
+
+/** ***********************
+ * HELPERS: HUE ROTATION
+ *************************/
 
 const rotateHue = (
   okhslHue: number,
@@ -218,7 +234,7 @@ const rotateHue = (
   maxHueShiftAmount: number,
 ) => {
   const lightnessMidpoint = maxLightness - minLightness;
-  const mpDistance = Math.abs(lightness - lightnessMidpoint);
+  const lightnessMidpointDistance = Math.abs(lightness - lightnessMidpoint);
 
   let rotation;
 
@@ -235,7 +251,7 @@ const rotateHue = (
   if (lightness > lightnessMidpoint) {
     const { dir, distance } = findNearestHue(okhslHue, 'light');
 
-    let hueFractionInScale = easeInQuad(mpDistance / (maxLightness - lightnessMidpoint + 15.0));
+    let hueFractionInScale = easeInQuad(lightnessMidpointDistance / (maxLightness - lightnessMidpoint + 0.15));
 
     // hack to make dark/light colors spread out a bit over hues
     if (hueFractionInScale > 0.2 && distance < 50.0) hueFractionInScale = 0.2;
@@ -244,7 +260,7 @@ const rotateHue = (
   } else {
     const { dir, distance } = findNearestHue(okhslHue, 'dark');
 
-    let hueFractionInScale = easeOutCubic(mpDistance / (lightnessMidpoint - minLightness + 40.0));
+    let hueFractionInScale = easeOutCubic(lightnessMidpointDistance / (lightnessMidpoint - minLightness + 0.40));
 
     // hack to make dark/light colors spread out a bit over hues
     if (hueFractionInScale > 0.4 && distance < 70.0) hueFractionInScale = 0.4;
@@ -391,7 +407,7 @@ const easeOutCubic = (x: number) => {
 };
 
 /** ***********************
- * HELPERS: NAMED SCALES
+ * HELPERS: NAMED HUE SCALES
  *************************/
 
 // based on palx

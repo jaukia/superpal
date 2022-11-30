@@ -5,7 +5,8 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "test": "yarn build && jest --config jest.config.js",
+    "test": "jest --config jest.config.js",
+    "update-snapshots": "jest --config jest.config.js --updateSnapshot",
     "build": "tsup",
     "dev": "tsup --watch",
     "format": "prettier --write \"src/**/*.ts\"",
