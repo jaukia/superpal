@@ -1,9 +1,11 @@
 import { hsluvToHex, hexToHsluv } from 'hsluv';
 import { converter, formatHex } from 'culori';
 
-const DEFAULT_COLOR_SPACE = 'Okhsl';
+const DEFAULT_COLOR_SPACE:ColorSpace = 'okhsl';
 const DEFAULT_MAX_HUE_SHIFT_AMOUNT = 60;
 
+// hand-picked values, to try to optimize the quality of the palette
+// when compared to handmade palettes
 const LIG_STEPS = [97.0, 93.0, 87.0, 80.0, 68.0, 62.0, 55.0, 46.0, 37.0, 25.0];
 const SAT_STEPS = [95.0, 95.0, 95.0, 97.0, 97.0, 97.0, 97.0, 97.0, 90.0, 80.0];
 
@@ -13,6 +15,8 @@ const HSL_CONVERTER = converter('hsl');
 /*************************
  * INTERFACES
  *************************/
+
+ type ColorSpace = 'okhsl' | 'hsluv' | 'hsl';
 
 interface ColorScale {
   [index: string]: string;
@@ -24,6 +28,17 @@ interface ColorMetadata {
   analogous30: string[];
   analogous60: string[];
   complementary: string;
+}
+
+interface ColorObject {
+  mode: string;
+  h?: number;
+  s?: number;
+  l?: number;
+  a?: number;
+  r?: number;
+  g?: number;
+  b?: number;
 }
 
 export type ColorScaleKey =
@@ -58,15 +73,11 @@ interface HueInformation {
  * SUPEPAL MAIN FUNCTIONS
  *************************/
 
-export const colorToHex = (colorStringOrObject: string | object) => {
-  return formatHex(colorStringOrObject);
-};
-
 export const superpal = (
   colorStringOrObject: string | object,
   adjustSaturation = true,
   addMetadata = true,
-  colorSpace: string = DEFAULT_COLOR_SPACE,
+  colorSpace: ColorSpace = DEFAULT_COLOR_SPACE,
   maxHueShiftAmount: number = DEFAULT_MAX_HUE_SHIFT_AMOUNT,
 ): ColorPalette => {
   // perhaps redundant, but ensures that the string input
@@ -76,7 +87,7 @@ export const superpal = (
 
   const correctColorSpaceHSLColor = hexToHSL(hexColorIn, colorSpace);
 
-  const rawHSLspaceColor = hexToHSL(hexColorIn, 'HSL');
+  const rawHSLspaceColor = hexToHSL(hexColorIn, 'hsl');
   const rawHSLspaceHues = createHueLookupArray(12)(rawHSLspaceColor[0]);
 
   const output: ColorPalette = <ColorPalette>{};
@@ -85,24 +96,25 @@ export const superpal = (
     const curHueName = hueName(rawHSLspaceHue);
     if (curHueName === undefined) return;
 
-    const rawHSLSpaceHexForCurHue = HSLtoHex([rawHSLspaceHue, rawHSLspaceColor[1], rawHSLspaceColor[2]], 'HSL');
+    const rawHSLSpaceHexForCurHue = colorToHex(
+      {mode:'hsl', h:rawHSLspaceHue, s:rawHSLspaceColor[1]/100.0, l:rawHSLspaceColor[2]/100.0}
+    );
 
     const curHueAngleInCorrectColorSpace = hexToHSL(rawHSLSpaceHexForCurHue, colorSpace)[0];
 
     // we pass in color with equal lightness/saturation here for scale
     // generation. perhaps not the "correct" lightness, but doesn't matter
     // since the lightness values get mangled anyhow in color creation
-    const hexColor = HSLtoHex(
-      [curHueAngleInCorrectColorSpace, correctColorSpaceHSLColor[1], correctColorSpaceHSLColor[2]],
-      colorSpace,
-    );
+    const hexColor = colorToHex({mode: colorSpace,
+      h:curHueAngleInCorrectColorSpace, s:correctColorSpaceHSLColor[1]/100.0, l:correctColorSpaceHSLColor[2]/100.0
+    });
 
-    const colorScaleArray = superPalColorScale(hexColor, colorSpace, maxHueShiftAmount, adjustSaturation);
+    const colorScaleArray = buildColorScale(hexColor, colorSpace, maxHueShiftAmount, adjustSaturation);
     output[curHueName] = colorScaleArray;
   });
 
-  const grayScaleBaseColor = HSLtoHex([correctColorSpaceHSLColor[0], 8.0, 50.0], colorSpace);
-  output.gray = superPalColorScale(grayScaleBaseColor, colorSpace, maxHueShiftAmount, true);
+  const grayScaleBaseColor = colorToHex({mode: colorSpace, h: correctColorSpaceHSLColor[0], s: 8.0/100.0, l: 50.0/100.0});
+  output.gray = buildColorScale(grayScaleBaseColor, colorSpace, maxHueShiftAmount, true);
 
   if (addMetadata) {
     output.metadata = {
@@ -117,17 +129,15 @@ export const superpal = (
   return output;
 };
 
-// this section is completely new
-// and not based on palx
-export const superPalColorScale = (
+export const buildColorScale = (
   hexColor: string,
-  colorSpace: string,
+  colorSpace: ColorSpace,
   maxHueShiftAmount: number,
   adjustSaturation = true,
 ): ColorScale => {
   const [inHue, inSat] = hexToHSL(hexColor, colorSpace);
 
-  const okhslColor = hexToHSL(hexColor, 'Okhsl');
+  const okhslColor = hexToHSL(hexColor, 'okhsl');
   const okhslHueAngle = okhslColor[0];
 
   const minLightness = Math.min(...LIG_STEPS);
@@ -157,7 +167,7 @@ export const superPalColorScale = (
 
     const curSat = satAdjustment * SAT_STEPS[index];
 
-    const outHexColor = HSLtoHex([curHue, curSat, curLig], colorSpace);
+    const outHexColor = colorToHex({mode: colorSpace, h:curHue, s:curSat/100.0, l:curLig/100.0});
 
     colorMap[index * 100] = outHexColor;
   });
@@ -165,37 +175,33 @@ export const superPalColorScale = (
   return colorMap;
 };
 
+// export culori colorToHex to make it available easily
+// for libraries that use superpal and extend it with hsluv support
+export const colorToHex = (colorStringOrObject: string | ColorObject) => {
+  const c = <ColorObject>colorStringOrObject;
+  if(c.mode && c.mode === 'hsluv') {
+    if(!c.s || !c.h || !c.l) return;
+    return hsluvToHex([c.h, c.s*100.0, c.l*100.0]);
+  } else {
+    return formatHex(colorStringOrObject);
+  }
+}
+
 /** ***********************
  * HELPERS: COLOR CONVERSION AND ADJUSTMENT
  *************************/
 
-const HSLtoHex = (colorArray: number[], colorSpaceIn: string) => {
-  const [curHue, curSat, curLig] = colorArray;
-
-  let outHexColor;
-
-  if (colorSpaceIn === 'Okhsl') {
-    outHexColor = formatHex({ mode: 'okhsl', h: curHue, s: curSat / 100.0, l: curLig / 100.0 });
-  } else if (colorSpaceIn === 'HSLuv') {
-    outHexColor = hsluvToHex([curHue, curSat, curLig]);
-  } else if (colorSpaceIn === 'HSL') {
-    outHexColor = formatHex({ mode: 'hsl', h: curHue, s: curSat / 100.0, l: curLig / 100.0 });
-  }
-
-  return outHexColor;
-};
-
-const hexToHSL = (hexColor: string, colorSpaceIn: string) => {
+const hexToHSL = (hexColor: string, colorSpaceIn: ColorSpace) => {
   let inHue;
   let inSat;
   let inLig;
-  if (colorSpaceIn === 'Okhsl') {
+  if (colorSpaceIn === 'okhsl') {
     const raw = OKHSL_CONVERTER(hexColor);
     if (raw.h === undefined) raw.h = 0.0;
     [inHue, inSat, inLig] = [raw.h, raw.s * 100.0, raw.l * 100.0];
-  } else if (colorSpaceIn === 'HSLuv') {
+  } else if (colorSpaceIn === 'hsluv') {
     [inHue, inSat, inLig] = hexToHsluv(hexColor);
-  } else if (colorSpaceIn === 'HSL') {
+  } else if (colorSpaceIn === 'hsl') {
     const raw = HSL_CONVERTER(hexColor);
     if (raw.h === undefined) raw.h = 0.0;
     [inHue, inSat, inLig] = [raw.h, raw.s * 100.0, raw.l * 100.0];
@@ -390,6 +396,7 @@ const easeOutCubic = (x: number) => {
 
 // based on palx
 // https://github.com/jxnblk/palx/blob/master/palx/src/index.js
+// note, red is twice (at 0 and at 360 degrees)
 const COLOR_SCALE_NAMES = [
   'red', // 0
   'orange', // 30
