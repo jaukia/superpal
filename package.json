@@ -1,6 +1,6 @@
 {
   "name": "superpal",
-  "version": "1.2.16",
+  "version": "1.2.18",
   "description": "Create automatically a palette with vivid colors from a single input color for UI design and design systems.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -13,7 +13,7 @@
     "prepack": "yarn build",
     "prepublish": "yarn format && yarn test && yarn lint",
     "publish": "yarn npm publish --access public",
-    "bump": "yarn lint && yarn version -i patch && git push && git push --tags"
+    "bump": "yarn lint && yarn version -i patch && git commit -am \"Bump version\" && git push && git push --tags"
   },
   "repository": {
     "type": "git",
