@@ -58,7 +58,7 @@ export type ColorScaleKey =
   | 'blue'
   | 'indigo'
   | 'violet'
-  | 'fuschia'
+  | 'fuchsia'
   | 'pink'
   | 'gray';
 
@@ -424,7 +424,7 @@ const COLOR_SCALE_NAMES = [
   'blue', // 210
   'indigo', // 240
   'violet', // 270
-  'fuschia', // 300
+  'fuchsia', // 300
   'pink', // 330
   'red', // 360
 ] as ColorScaleKey[];
