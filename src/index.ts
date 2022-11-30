@@ -185,7 +185,7 @@ export const buildColorScale = (
 // but supports also hsluv
 export const colorToHex = (colorStringOrObject: string | ColorObject) => {
   const c = <ColorObject>colorStringOrObject;
-  if (c.mode && c.mode === 'hsluv') {
+  if (c.mode && c.mode == 'hsluv') {
     if (!c.s || !c.h || !c.l) return;
     return hsluvToHex([c.h, c.s * 100.0, c.l * 100.0]);
   } else {
@@ -197,9 +197,9 @@ export const colorToHex = (colorStringOrObject: string | ColorObject) => {
 // but supports also hsluv
 export const hexToColor = (hexColor: string, colorSpaceIn: ColorSpace): HslColorObject => {
   let retValue: HslColorObject;
-  if (colorSpaceIn === 'okhsl') {
+  if (colorSpaceIn == 'okhsl') {
     retValue = OKHSL_CONVERTER(hexColor);
-  } else if (colorSpaceIn === 'hsluv') {
+  } else if (colorSpaceIn == 'hsluv') {
     const [inHue, inSat, inLig] = hexToHsluv(hexColor);
     retValue = { mode: 'hsluv', h: inHue, s: inSat / 100.0, l: inLig / 100.0 };
   } else {
@@ -212,16 +212,18 @@ export const hexToColor = (hexColor: string, colorSpaceIn: ColorSpace): HslColor
 // in another color space conversion, supports also hsluv
 export const colorToColor = (colorObject: ColorObject, targetColorSpace: ColorSpace) => {
   let retValue: HslColorObject;
-  if (targetColorSpace === 'okhsl') {
-    retValue = OKHSL_CONVERTER(colorObject);
-  } else if (targetColorSpace === 'hsluv') {
-    // FIXME: some other intermediate format could be better than hex here
-    const hexColor = colorToHex(colorObject);
-    const [inHue, inSat, inLig] = hexToHsluv(hexColor);
-    retValue = { mode: 'hsluv', h: inHue, s: inSat / 100.0, l: inLig / 100.0 };
+
+  // FIXME: some other intermediate format could be better than hex here
+  if(colorObject.mode == 'hsluv' || targetColorSpace == 'hsluv') {
+    return hexToColor(colorToHex(colorObject), targetColorSpace);
   } else {
-    retValue = HSL_CONVERTER(colorObject);
+    if (targetColorSpace == 'okhsl') {
+      retValue = OKHSL_CONVERTER(colorObject);
+    } else {
+      retValue = HSL_CONVERTER(colorObject);
+    }
   }
+
   return retValue;
 };
 

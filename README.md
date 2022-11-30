@@ -71,7 +71,7 @@ const colorData = superpal("#60a5fa");
     "800": "#602abf",
     "900": "#3f227c"
   },
-  "fuschia": {
+  "fuchsia": {
     "0": "#fdf3fb",
     "100": "#fbe2f6",
     "200": "#f8c9f0",
