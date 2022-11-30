@@ -214,7 +214,7 @@ export const colorToColor = (colorObject: ColorObject, targetColorSpace: ColorSp
   let retValue: HslColorObject;
 
   // FIXME: some other intermediate format could be better than hex here
-  if(colorObject.mode == 'hsluv' || targetColorSpace == 'hsluv') {
+  if (colorObject.mode == 'hsluv' || targetColorSpace == 'hsluv') {
     return hexToColor(colorToHex(colorObject), targetColorSpace);
   } else {
     if (targetColorSpace == 'okhsl') {
