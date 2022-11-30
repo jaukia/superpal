@@ -19,11 +19,21 @@ interface ColorScale {
 }
 
 interface ColorMetadata {
-  [index: string]: string | string[];
+  input: string;
+  main: string;
+  analogous30: string[];
+  analogous60: string[];
+  complementary: string;
 }
 
-interface ColorPalette {
-  [index: string]: ColorScale | ColorMetadata;
+type ScaleKey = 'orange' | 'yellow' | 'lime' | 'green' | 'teal' | 'cyan' | 'blue' | 'indigo' | 'violet' | 'fuschia' | 'pink' | 'gray';
+
+type ColorScales = {
+  [key in ScaleKey]: ColorScale;
+}
+
+interface ColorPalette extends ColorScales {
+  metadata?: ColorMetadata;
 }
 
 interface HueInformation {
@@ -57,7 +67,9 @@ export const superpal = (
   const rawHSLspaceColor = hexToHSL(hexColorIn, 'HSL');
   const rawHSLspaceHues = createHueLookupArray(12)(rawHSLspaceColor[0]);
 
-  const output: ColorPalette = {};
+  const output:ColorPalette = <ColorPalette>{
+
+  };
 
   const grayScaleBaseColor = HSLtoHex([correctColorSpaceHSLColor[0], 8.0, 50.0], colorSpace);
   output.gray = superPalColorScale(grayScaleBaseColor, colorSpace, maxHueShiftAmount, true);
@@ -382,9 +394,9 @@ const COLOR_SCALE_NAMES = [
   'fuschia', // 300
   'pink', // 330
   'red', // 360
-];
+] as ScaleKey[];
 
-const hueName = (inHue: number) => {
+const hueName = (inHue: number):ScaleKey => {
   const i = Math.round((inHue - 2) / 30);
   return COLOR_SCALE_NAMES[i];
 };
