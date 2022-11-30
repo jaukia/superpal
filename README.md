@@ -19,6 +19,9 @@ const colorData = superpal("#60a5fa");
 //    (see "Example output" below).
 ```
 
+Example project on Observable that shows visully how the library works:
+https://observablehq.com/d/4ce9e569386d7210
+
 ## Example Output
 
 ```json

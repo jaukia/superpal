@@ -5,9 +5,9 @@ test("superpal (no args)", () => {
 });
 
 test("superpal many args (hsl)", () => {
-  expect(superpal("#60a5fa", true, true, "hsl", 60.0)).toMatchSnapshot();
+  expect(superpal("#60a5fa", {colorSpace:"hsl"})).toMatchSnapshot();
 });
 
 test("superpal many args (hsluv)", () => {
-  expect(superpal("#60a5fa", true, true, "hsluv", 60.0)).toMatchSnapshot();
+  expect(superpal("#60a5fa", {colorSpace:"hsluv"})).toMatchSnapshot();
 });

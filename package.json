@@ -14,7 +14,7 @@
     "prepack": "yarn build",
     "prepublish": "yarn format && yarn test && yarn lint",
     "publish": "yarn npm publish --access public",
-    "bump": "yarn lint && yarn version -i patch && git commit -am \"Bump version\" && git push && git push --tags"
+    "bump": "yarn test && yarn lint && yarn version -i patch && git commit -am \"Bump version\" && git push && git push --tags"
   },
   "repository": {
     "type": "git",

@@ -1,14 +1,6 @@
 import { hsluvToHex, hexToHsluv } from 'hsluv';
 import { converter, formatHex } from 'culori';
 
-const DEFAULT_COLOR_SPACE: ColorSpace = 'okhsl';
-const DEFAULT_MAX_HUE_SHIFT_AMOUNT = 60.0;
-
-// hand-picked values, to try to optimize the quality of the palette
-// when compared to handmade palettes
-const LIG_STEPS = [0.97, 0.93, 0.87, 0.8, 0.68, 0.62, 0.55, 0.46, 0.37, 0.25];
-const SAT_STEPS = [0.95, 0.95, 0.95, 0.97, 0.97, 0.97, 0.97, 0.97, 0.9, 0.8];
-
 const OKHSL_CONVERTER = converter('okhsl');
 const HSL_CONVERTER = converter('hsl');
 
@@ -76,23 +68,48 @@ interface HueInformation {
   maxDistance: number;
 }
 
+type Optional<Type> = {
+  [Property in keyof Type]+?: Type[Property];
+};
+
+interface PaletteParams {
+  adjustSaturation: boolean;
+  addMetadata: boolean;
+  colorSpace: ColorSpace;
+  maxHueShiftAmount: number;
+  lightnessValues: number[],
+  saturationFinetune: number[] | false,
+}
+
+const defaultPaletteParams: PaletteParams = {
+  adjustSaturation: true,
+  addMetadata: true,
+  colorSpace: 'okhsl',
+  maxHueShiftAmount: 60.0,
+  lightnessValues: [0.97, 0.93, 0.87, 0.8, 0.68, 0.62, 0.55, 0.46, 0.37, 0.25],
+  saturationFinetune: [0.95, 0.95, 0.95, 0.97, 0.97, 0.97, 0.97, 0.97, 0.9, 0.8],
+};
+
 /** ***********************
  * SUPEPAL MAIN FUNCTIONS
  *************************/
 
 export const superpal = (
   colorStringOrObject: string | object,
-  adjustSaturation = true,
-  addMetadata = true,
-  colorSpace: ColorSpace = DEFAULT_COLOR_SPACE,
-  maxHueShiftAmount: number = DEFAULT_MAX_HUE_SHIFT_AMOUNT,
+  paramsIn: Optional<PaletteParams> = {},
 ): ColorPalette => {
+
+  const params = {
+    ...defaultPaletteParams,
+    ...paramsIn,
+  };
+
   // perhaps redundant, but ensures that the string input
   // is treated consistently.
   // FIXME: how could p3 be supported?
   const hexColorIn = formatHex(colorStringOrObject);
 
-  const correctColorSpaceHSLColor = hexToColor(hexColorIn, colorSpace);
+  const correctColorSpaceHSLColor = hexToColor(hexColorIn, params.colorSpace);
 
   const rawHSLspaceColor = colorToColor(correctColorSpaceHSLColor, 'hsl');
   const rawHSLspaceHues = createHueLookupArray(12)(rawHSLspaceColor.h);
@@ -103,26 +120,26 @@ export const superpal = (
     const curHueName = hueName(rawHSLspaceHue);
     if (curHueName === undefined) return;
 
-    const curHueInCorrectColorSpace = colorToColor({ ...rawHSLspaceColor, h: rawHSLspaceHue }, colorSpace);
+    const curHueInCorrectColorSpace = colorToColor({ ...rawHSLspaceColor, h: rawHSLspaceHue }, params.colorSpace);
 
     // we pass in color with equal lightness/saturation here for scale
     // generation. perhaps not the "correct" lightness, but doesn't matter
     // since the lightness values get mangled anyhow in color creation
     const baseColor = {
-      mode: colorSpace,
+      mode: params.colorSpace,
       h: curHueInCorrectColorSpace.h,
       s: correctColorSpaceHSLColor.s,
       l: correctColorSpaceHSLColor.l,
     };
 
-    const colorScaleArray = buildColorScale(baseColor, colorSpace, maxHueShiftAmount, adjustSaturation);
+    const colorScaleArray = buildColorScale(baseColor, params);
     output[curHueName] = colorScaleArray;
   });
 
-  const grayScaleBaseColor = { mode: colorSpace, h: correctColorSpaceHSLColor.h, s: 0.08, l: 0.5 };
-  output.gray = buildColorScale(grayScaleBaseColor, colorSpace, maxHueShiftAmount, true);
+  const grayScaleBaseColor = { mode: params.colorSpace, h: correctColorSpaceHSLColor.h, s: 0.08, l: 0.5 };
+  output.gray = buildColorScale(grayScaleBaseColor, params);
 
-  if (addMetadata) {
+  if (params.addMetadata) {
     output.metadata = {
       input: hexColorIn,
       main: hueName(rawHSLspaceHues[0]),
@@ -137,40 +154,41 @@ export const superpal = (
 
 export const buildColorScale = (
   baseColor: HslColorObject,
-  colorSpace: ColorSpace,
-  maxHueShiftAmount: number,
-  adjustSaturation = true,
+  params: PaletteParams,
 ): ColorScale => {
   const okhslColor = colorToColor(baseColor, 'okhsl');
   const okhslHueAngle = okhslColor.h;
 
-  const minLightness = Math.min(...LIG_STEPS);
-  const maxLightness = Math.max(...LIG_STEPS);
+  const minLightness = Math.min(...params.lightnessValues);
+  const maxLightness = Math.max(...params.lightnessValues);
 
-  let satAdjustment: number;
-  if (adjustSaturation) {
+  let adjustedSatValue: number;
+  if (params.adjustSaturation) {
     // A simple heuristic for adjusting the saturation to take into account the input
     // color saturation. This may need improving at some point.
-    satAdjustment = Math.min(1.0, baseColor.s / SAT_STEPS[0]);
+    const fineTune = params.saturationFinetune?params.saturationFinetune[0]:1.0;
+    adjustedSatValue = Math.min(1.0, baseColor.s/fineTune);
   } else {
-    satAdjustment = 1.0;
+    adjustedSatValue = 1.0;
   }
 
   const colorMap: ColorScale = {};
 
-  LIG_STEPS.forEach((curLig, index) => {
+  params.lightnessValues.forEach((curLig, index) => {
     // recalculating color as okhsl to get correct angles, since not sure
     // what format it is really in, this would be simpler
     // if/when we can always assume okhsl color space
-    const curHueRotation = rotateHue(okhslHueAngle, curLig, minLightness, maxLightness, maxHueShiftAmount);
+    const curHueRotation = rotateHue(okhslHueAngle, curLig, minLightness, maxLightness, params.maxHueShiftAmount);
 
     // this is not quite correct, since we are taking a delta angle from
     // okhsl color space and applying it potentially to something else, but
     // perhaps that is not a major issue
     const curHue = baseColor.h + curHueRotation;
 
-    const curSat = satAdjustment * SAT_STEPS[index];
-    const outHexColor = colorToHex({ mode: colorSpace, h: curHue, s: curSat, l: curLig });
+    const satMultiplier = params.saturationFinetune?params.saturationFinetune[index]:1.0;
+
+    const curSat = adjustedSatValue * satMultiplier;
+    const outHexColor = colorToHex({ mode: params.colorSpace, h: curHue, s: curSat, l: curLig });
     colorMap[index * 100] = outHexColor;
   });
 
