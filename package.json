@@ -1,6 +1,6 @@
 {
   "name": "superpal",
-  "version": "1.2.21",
+  "version": "1.2.22",
   "description": "Create automatically a palette with vivid colors from a single input color for UI design and design systems.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
