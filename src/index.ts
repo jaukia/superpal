@@ -20,16 +20,16 @@ interface ColorScale {
 
 interface ColorMetadata {
   input: string;
-  main: string;
+  main: ColorScaleKey;
   analogous30: string[];
   analogous60: string[];
   complementary: string;
 }
 
-type ScaleKey = 'orange' | 'yellow' | 'lime' | 'green' | 'teal' | 'cyan' | 'blue' | 'indigo' | 'violet' | 'fuschia' | 'pink' | 'gray';
+export type ColorScaleKey = 'orange' | 'yellow' | 'lime' | 'green' | 'teal' | 'cyan' | 'blue' | 'indigo' | 'violet' | 'fuschia' | 'pink' | 'gray';
 
 type ColorScales = {
-  [key in ScaleKey]: ColorScale;
+  [key in ColorScaleKey]: ColorScale;
 }
 
 interface ColorPalette extends ColorScales {
@@ -394,9 +394,9 @@ const COLOR_SCALE_NAMES = [
   'fuschia', // 300
   'pink', // 330
   'red', // 360
-] as ScaleKey[];
+] as ColorScaleKey[];
 
-const hueName = (inHue: number):ScaleKey => {
+const hueName = (inHue: number):ColorScaleKey => {
   const i = Math.round((inHue - 2) / 30);
   return COLOR_SCALE_NAMES[i];
 };
