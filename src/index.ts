@@ -59,7 +59,7 @@ type ColorScales = {
 };
 
 interface ColorPalette extends ColorScales {
-  metadata?: ColorMetadata;
+  metadata: ColorMetadata;
 }
 
 interface HueInformation {
@@ -74,7 +74,6 @@ type Optional<Type> = {
 
 interface PaletteParams {
   adjustSaturation: boolean;
-  addMetadata: boolean;
   colorSpace: ColorSpace;
   maxHueShiftAmount: number;
   lightnessValues: number[];
@@ -85,7 +84,6 @@ interface PaletteParams {
 
 const defaultPaletteParams: PaletteParams = {
   adjustSaturation: true,
-  addMetadata: true,
   colorSpace: 'okhsl',
   maxHueShiftAmount: 60.0,
   lightnessValues: [0.97, 0.93, 0.87, 0.8, 0.68, 0.62, 0.55, 0.46, 0.37, 0.25],
@@ -147,16 +145,14 @@ export const superpal = (
   };
   output.gray = buildColorScale(grayScaleBaseColor, params);
 
-  if (params.addMetadata) {
-    output.metadata = {
-      input: hexColorIn,
-      main: hueName(rawHSLspaceHues[0]),
-      analogous30: [hueName(rawHSLspaceHues[1]), hueName(rawHSLspaceHues[rawHSLspaceHues.length - 1])],
-      analogous60: [hueName(rawHSLspaceHues[2]), hueName(rawHSLspaceHues[rawHSLspaceHues.length - 2])],
-      complementary: hueName(rawHSLspaceHues[rawHSLspaceHues.length / 2]),
-    } as ColorMetadata;
-  }
-
+  output.metadata = {
+    input: hexColorIn,
+    main: hueName(rawHSLspaceHues[0]),
+    analogous30: [hueName(rawHSLspaceHues[1]), hueName(rawHSLspaceHues[rawHSLspaceHues.length - 1])],
+    analogous60: [hueName(rawHSLspaceHues[2]), hueName(rawHSLspaceHues[rawHSLspaceHues.length - 2])],
+    complementary: hueName(rawHSLspaceHues[rawHSLspaceHues.length / 2]),
+  } as ColorMetadata;
+  
   return output;
 };
 
