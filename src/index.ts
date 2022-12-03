@@ -8,13 +8,13 @@ const HSL_CONVERTER = converter('hsl');
  * INTERFACES AND TYPES
  *************************/
 
-type ColorSpace = 'okhsl' | 'hsluv' | 'hsl';
+export type ColorSpace = 'okhsl' | 'hsluv' | 'hsl';
 
-interface ColorScale {
+export interface ColorScale {
   [index: string]: string;
 }
 
-interface ColorMetadata {
+export interface ColorMetadata {
   input: string;
   main: ColorScaleKey;
   analogous30: string[];
@@ -58,7 +58,7 @@ type ColorScales = {
   [key in ColorScaleKey]: ColorScale;
 };
 
-interface ColorPalette extends ColorScales {
+export interface ColorPalette extends ColorScales {
   metadata: ColorMetadata;
 }
 
@@ -76,7 +76,8 @@ interface PaletteParams {
   adjustSaturation: boolean;
   colorSpace: ColorSpace;
   maxHueShiftAmount: number;
-  lightnessValues: number[];
+  colorLightnessValues: number[];
+  grayLightnessValues: number[];
   saturationFinetune: number[] | false;
   grayscaleSaturation: number;
   spreadOutMinMaxValues: boolean;
@@ -86,7 +87,8 @@ const defaultPaletteParams: PaletteParams = {
   adjustSaturation: true,
   colorSpace: 'okhsl',
   maxHueShiftAmount: 60.0,
-  lightnessValues: [0.97, 0.93, 0.87, 0.8, 0.68, 0.62, 0.55, 0.46, 0.37, 0.25],
+  colorLightnessValues: [0.97, 0.93, 0.87, 0.77, 0.63, 0.45, 0.3, 0.19, 0.13, 0.08], //[0.97, 0.93, 0.87, 0.76, 0.63, 0.48, 0.35, 0.23, 0.14, 0.08], //[0.97, 0.93, 0.87, 0.8, 0.68, 0.55, 0.48, 0.18, 0.14, 0.08], //[0.97, 0.93, 0.87, 0.8, 0.68, 0.62, 0.55, 0.46, 0.37, 0.25],
+  grayLightnessValues: [0.97, 0.93, 0.87, 0.77, 0.63, 0.45, 0.3, 0.19, 0.13, 0.08], //[0.97, 0.93, 0.87, 0.76, 0.63, 0.48, 0.35, 0.23, 0.14, 0.08], //[0.97, 0.93, 0.87, 0.8, 0.68, 0.55, 0.48, 0.18, 0.14, 0.08], //[0.97, 0.93, 0.87, 0.8, 0.68, 0.62, 0.55, 0.46, 0.37, 0.25],
   saturationFinetune: [0.95, 0.95, 0.95, 0.97, 0.97, 0.97, 0.97, 0.97, 0.9, 0.8],
   grayscaleSaturation: 0.08,
   spreadOutMinMaxValues: true,
@@ -133,7 +135,7 @@ export const superpal = (
       l: correctColorSpaceHSLColor.l,
     };
 
-    const colorScaleArray = buildColorScale(baseColor, params);
+    const colorScaleArray = buildColorScale(baseColor, params, false);
     output[curHueName] = colorScaleArray;
   });
 
@@ -143,7 +145,7 @@ export const superpal = (
     s: params.grayscaleSaturation,
     l: 0.5,
   };
-  output.gray = buildColorScale(grayScaleBaseColor, params);
+  output.gray = buildColorScale(grayScaleBaseColor, params, true);
 
   output.metadata = {
     input: hexColorIn,
@@ -152,16 +154,18 @@ export const superpal = (
     analogous60: [hueName(rawHSLspaceHues[2]), hueName(rawHSLspaceHues[rawHSLspaceHues.length - 2])],
     complementary: hueName(rawHSLspaceHues[rawHSLspaceHues.length / 2]),
   } as ColorMetadata;
-  
+
   return output;
 };
 
-export const buildColorScale = (baseColor: HslColorObject, params: PaletteParams): ColorScale => {
+export const buildColorScale = (baseColor: HslColorObject, params: PaletteParams, isGray:boolean): ColorScale => {
   const okhslColor = colorToColor(baseColor, 'okhsl');
   const okhslHueAngle = okhslColor.h;
 
-  const minLightness = Math.min(...params.lightnessValues);
-  const maxLightness = Math.max(...params.lightnessValues);
+  const lightnessValues = isGray?params.grayLightnessValues:params.colorLightnessValues;
+
+  const minLightness = Math.min(...lightnessValues);
+  const maxLightness = Math.max(...lightnessValues);
 
   let adjustedSatValue: number;
   if (params.adjustSaturation) {
@@ -175,7 +179,7 @@ export const buildColorScale = (baseColor: HslColorObject, params: PaletteParams
 
   const colorMap: ColorScale = {};
 
-  params.lightnessValues.forEach((curLig, index) => {
+  lightnessValues.forEach((curLig, index) => {
     // recalculating color as okhsl to get correct angles, since not sure
     // what format it is really in, this would be simpler
     // if/when we can always assume okhsl color space
