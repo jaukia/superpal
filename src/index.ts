@@ -87,8 +87,8 @@ const defaultPaletteParams: PaletteParams = {
   adjustSaturation: true,
   colorSpace: 'okhsl',
   maxHueShiftAmount: 60.0,
-  colorLightnessValues: [0.97, 0.93, 0.87, 0.77, 0.63, 0.45, 0.3, 0.19, 0.13, 0.08], //[0.97, 0.93, 0.87, 0.76, 0.63, 0.48, 0.35, 0.23, 0.14, 0.08], //[0.97, 0.93, 0.87, 0.8, 0.68, 0.55, 0.48, 0.18, 0.14, 0.08], //[0.97, 0.93, 0.87, 0.8, 0.68, 0.62, 0.55, 0.46, 0.37, 0.25],
-  grayLightnessValues: [0.97, 0.93, 0.87, 0.77, 0.63, 0.45, 0.3, 0.19, 0.13, 0.08], //[0.97, 0.93, 0.87, 0.76, 0.63, 0.48, 0.35, 0.23, 0.14, 0.08], //[0.97, 0.93, 0.87, 0.8, 0.68, 0.55, 0.48, 0.18, 0.14, 0.08], //[0.97, 0.93, 0.87, 0.8, 0.68, 0.62, 0.55, 0.46, 0.37, 0.25],
+  colorLightnessValues: [0.95, 0.91, 0.85, 0.76, 0.65, 0.54, 0.45, 0.37, 0.31, 0.26],
+  grayLightnessValues: [0.97, 0.93, 0.87, 0.77, 0.63, 0.45, 0.3, 0.19, 0.13, 0.08],
   saturationFinetune: [0.95, 0.95, 0.95, 0.97, 0.97, 0.97, 0.97, 0.97, 0.9, 0.8],
   grayscaleSaturation: 0.08,
   spreadOutMinMaxValues: true,
@@ -158,11 +158,11 @@ export const superpal = (
   return output;
 };
 
-export const buildColorScale = (baseColor: HslColorObject, params: PaletteParams, isGray:boolean): ColorScale => {
+export const buildColorScale = (baseColor: HslColorObject, params: PaletteParams, isGray: boolean): ColorScale => {
   const okhslColor = colorToColor(baseColor, 'okhsl');
   const okhslHueAngle = okhslColor.h;
 
-  const lightnessValues = isGray?params.grayLightnessValues:params.colorLightnessValues;
+  const lightnessValues = isGray ? params.grayLightnessValues : params.colorLightnessValues;
 
   const minLightness = Math.min(...lightnessValues);
   const maxLightness = Math.max(...lightnessValues);
