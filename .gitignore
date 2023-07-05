@@ -4,3 +4,4 @@ misc
 UPDATING.txt
 .yarn
 .pnp.*
+.DS_Store
