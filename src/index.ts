@@ -169,7 +169,7 @@ export const superpal = (
     output.metadata.analogous30 = [hueName(rawHSLspaceHues[1]), hueName(rawHSLspaceHues[rawHSLspaceHues.length - 1])];
     output.metadata.analogous60 = [hueName(rawHSLspaceHues[2]), hueName(rawHSLspaceHues[rawHSLspaceHues.length - 2])];
     output.metadata.complementary = hueName(rawHSLspaceHues[rawHSLspaceHues.length / 2]);
-  };
+  }
 
   return output;
 };
