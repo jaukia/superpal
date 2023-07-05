@@ -82,6 +82,7 @@ interface PaletteParams {
   grayscaleSaturation: number;
   spreadOutMinMaxValues: boolean;
   colorKeys: string[];
+  returnFullPalette: boolean;
 }
 
 const defaultPaletteParams: PaletteParams = {
@@ -94,6 +95,7 @@ const defaultPaletteParams: PaletteParams = {
   saturationFinetune: [0.95, 0.95, 0.95, 0.97, 0.97, 0.97, 0.97, 0.97, 0.9, 0.8, 0.7],
   grayscaleSaturation: 0.08,
   spreadOutMinMaxValues: true,
+  returnFullPalette: true,
 };
 
 /** ***********************
@@ -112,12 +114,21 @@ export const superpal = (
   // perhaps redundant, but ensures that the string input
   // is treated consistently.
   // FIXME: how could p3 be supported?
-  const hexColorIn = formatHex(colorStringOrObject);
+  let hexColorIn = formatHex(colorStringOrObject);
+  
+  // hack to make sure hue is computed even for black
+  // to not have scales collapse
+  if(hexColorIn=="#000000" || hexColorIn=="#010101") hexColorIn="#020202";
 
   const correctColorSpaceHSLColor = hexToColor(hexColorIn, params.colorSpace);
-
   const rawHSLspaceColor = colorToColor(correctColorSpaceHSLColor, 'hsl');
-  const rawHSLspaceHues = createHueLookupArray(12)(rawHSLspaceColor.h);
+  
+  let rawHSLspaceHues;
+  if(params.returnFullPalette) {
+    rawHSLspaceHues = createHueLookupArray(12)(rawHSLspaceColor.h);
+  } else {
+    rawHSLspaceHues = [0];
+  }
 
   const output: ColorPalette = <ColorPalette>{};
 
@@ -151,11 +162,14 @@ export const superpal = (
 
   output.metadata = {
     input: hexColorIn,
-    main: hueName(rawHSLspaceHues[0]),
-    analogous30: [hueName(rawHSLspaceHues[1]), hueName(rawHSLspaceHues[rawHSLspaceHues.length - 1])],
-    analogous60: [hueName(rawHSLspaceHues[2]), hueName(rawHSLspaceHues[rawHSLspaceHues.length - 2])],
-    complementary: hueName(rawHSLspaceHues[rawHSLspaceHues.length / 2]),
+    main: hueName(rawHSLspaceHues[0])
   } as ColorMetadata;
+
+  if(rawHSLspaceHues.length > 1) {
+    output.metadata.analogous30 = [hueName(rawHSLspaceHues[1]), hueName(rawHSLspaceHues[rawHSLspaceHues.length - 1])];
+    output.metadata.analogous60 = [hueName(rawHSLspaceHues[2]), hueName(rawHSLspaceHues[rawHSLspaceHues.length - 2])];
+    output.metadata.complementary = hueName(rawHSLspaceHues[rawHSLspaceHues.length / 2]);
+  };
 
   return output;
 };
