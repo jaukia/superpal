@@ -88,7 +88,7 @@ const defaultPaletteParams: PaletteParams = {
   adjustSaturation: true,
   colorSpace: 'okhsl',
   maxHueShiftAmount: 60.0,
-  colorKeys: ["50", "100", "200", "300", "400", "500", "600", "700", "800", "900", "950"],
+  colorKeys: ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950'],
   colorLightnessValues: [0.95, 0.91, 0.85, 0.76, 0.65, 0.54, 0.45, 0.37, 0.31, 0.26, 0.24],
   grayLightnessValues: [0.97, 0.93, 0.87, 0.77, 0.63, 0.45, 0.3, 0.19, 0.13, 0.08, 0.04],
   saturationFinetune: [0.95, 0.95, 0.95, 0.97, 0.97, 0.97, 0.97, 0.97, 0.9, 0.8, 0.7],
