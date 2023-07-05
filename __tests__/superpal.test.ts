@@ -23,3 +23,11 @@ test("superpal without any saturation", () => {
 test("superpal for black", () => {
   expect(superpal("#000000")).toMatchSnapshot();
 });
+
+test("superpal short and long data to be equal", () => {
+  const partialPalette = superpal("#60a5fa", {returnFullPalette:false});
+  const fullPalette = superpal("#60a5fa", {returnFullPalette:true});
+  expect(partialPalette[partialPalette.metadata.main]).toEqual(
+    fullPalette[fullPalette.metadata.main]
+  )
+});

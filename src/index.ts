@@ -115,19 +115,18 @@ export const superpal = (
   // is treated consistently.
   // FIXME: how could p3 be supported?
   let hexColorIn = formatHex(colorStringOrObject);
-  
+
   // hack to make sure hue is computed even for black
   // to not have scales collapse
-  if(hexColorIn=="#000000" || hexColorIn=="#010101") hexColorIn="#020202";
+  if (hexColorIn == '#000000' || hexColorIn == '#010101') hexColorIn = '#020202';
 
   const correctColorSpaceHSLColor = hexToColor(hexColorIn, params.colorSpace);
   const rawHSLspaceColor = colorToColor(correctColorSpaceHSLColor, 'hsl');
-  
-  let rawHSLspaceHues;
-  if(params.returnFullPalette) {
-    rawHSLspaceHues = createHueLookupArray(12)(rawHSLspaceColor.h);
-  } else {
-    rawHSLspaceHues = [0];
+
+  let rawHSLspaceHues = createHueLookupArray(12)(rawHSLspaceColor.h);
+  if (params.returnFullPalette === false) {
+    // just the first value (that is, the one that matches the main color)
+    rawHSLspaceHues = rawHSLspaceHues.slice(0,1);
   }
 
   const output: ColorPalette = <ColorPalette>{};
@@ -162,10 +161,10 @@ export const superpal = (
 
   output.metadata = {
     input: hexColorIn,
-    main: hueName(rawHSLspaceHues[0])
+    main: hueName(rawHSLspaceHues[0]),
   } as ColorMetadata;
 
-  if(rawHSLspaceHues.length > 1) {
+  if (rawHSLspaceHues.length > 1) {
     output.metadata.analogous30 = [hueName(rawHSLspaceHues[1]), hueName(rawHSLspaceHues[rawHSLspaceHues.length - 1])];
     output.metadata.analogous60 = [hueName(rawHSLspaceHues[2]), hueName(rawHSLspaceHues[rawHSLspaceHues.length - 2])];
     output.metadata.complementary = hueName(rawHSLspaceHues[rawHSLspaceHues.length / 2]);
