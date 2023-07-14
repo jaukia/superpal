@@ -24,6 +24,10 @@ test("superpal for black", () => {
   expect(superpal("#000000")).toMatchSnapshot();
 });
 
+test("superpal for a particular shade of gray", () => {
+  expect(superpal("#848484")).toMatchSnapshot();
+});
+
 test("superpal short and long data to be equal", () => {
   const partialPalette = superpal("#60a5fa", {returnFullPalette:false});
   const fullPalette = superpal("#60a5fa", {returnFullPalette:true});

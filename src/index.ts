@@ -126,7 +126,7 @@ export const superpal = (
   let rawHSLspaceHues = createHueLookupArray(12)(rawHSLspaceColor.h);
   if (params.returnFullPalette === false) {
     // just the first value (that is, the one that matches the main color)
-    rawHSLspaceHues = rawHSLspaceHues.slice(0,1);
+    rawHSLspaceHues = rawHSLspaceHues.slice(0, 1);
   }
 
   const output: ColorPalette = <ColorPalette>{};
@@ -153,10 +153,11 @@ export const superpal = (
 
   const grayScaleBaseColor = {
     mode: params.colorSpace,
-    h: correctColorSpaceHSLColor.h,
+    h: correctColorSpaceHSLColor.h ? correctColorSpaceHSLColor.h : 0,
     s: params.grayscaleSaturation,
     l: 0.5,
   };
+
   output.gray = buildColorScale(grayScaleBaseColor, params, true);
 
   output.metadata = {
